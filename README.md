@@ -13,7 +13,7 @@ LDAP Authorization Plugin for OJS
 
 **Sample Settings**
 
-[!Sample Settings](sample_settings.png)
+![Sample Settings](sample_settings.png)
 
 
 # Notes
