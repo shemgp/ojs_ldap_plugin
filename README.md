@@ -9,7 +9,7 @@ LDAP Authorization Plugin for OJS
   git clone https://github.com/shemgp/ojs_ldap_plugin.git ldap
   ```
 2. Enable in global site settings.
-3. Set settings in global site settings.  (Note: works in `ldaps://` and `:636` or will always use `tls`).
+3. Set settings in global site settings.  (Note: works with `ldaps://` and `:636` or will always use `tls`).
 
 **Sample Settings**
 
