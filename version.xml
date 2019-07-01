@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE version SYSTEM "../../../lib/pkp/dtd/pluginVersion.dtd">
+
+<!--
+  * plugins/generic/ldap/version.xml
+  *
+  * Copyright (c) 2014-2019 Simon Fraser University
+  * Copyright (c) 2003-2019 John Willinsky
+  * Copyright (c) 2019 Shem Pasamba
+  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+  *
+  * Plugin version information.
+  -->
+<version>
+	<application>ldap</application>
+	<type>plugins.generic</type>
+	<release>0.1.1.0</release>
+	<date>2019-02-28</date>
+	<lazy-load>1</lazy-load>
+	<sitewide>1</sitewide>
+	<class>LDAPAuthPlugin</class>
+</version>
