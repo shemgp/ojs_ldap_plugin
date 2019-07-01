@@ -85,6 +85,10 @@ class LDAPHandler extends Handler {
 
 		$input =  $request->getUserVars();
 
+		// check csrf
+		if ($input['csrfToken'] != $request->getSession()->getCSRFToken())
+			die('Please refresh form.');
+
 		// get data from settings
 		$this->_plugin = $this->_getPlugin();
 		$this->_contextId = $this->_plugin->getCurrentContextId();
