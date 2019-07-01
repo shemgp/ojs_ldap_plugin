@@ -116,11 +116,17 @@ class LDAPHandler extends Handler {
 		// try to connect
 		$username = $input['username'];
 		$ldapConn = ldap_connect($ldapUrl);
+		if (!$ldapConn)
+			die('Unable to connect to ldap: '.$ldapUrl);
+
+		// set settings for making it work with AD
 		ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
 		ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
 
-		if (!$ldapConn)
-			die('Unable to connect to ldap: '.$ldapUrl);
+		// use tls if not using ldaps
+		if (!preg_match('/ldaps.*636/', $ldapUrl))
+			ldap_start_tls($ldapConn);
+
 
 		// try anonymous bind
 		$ldapBind = null;
