@@ -73,9 +73,9 @@ class LDAPSettingsForm extends Form {
 			new FormValidatorCustom(
 				$this,
 				'ldapBindPassword',
-				FORM_VALIDATOR_OPTIONAL_VALUE,
+				FORM_VALIDATOR_REQUIRED_VALUE,
 				'plugins.generic.ldap.manager.settings.ldapBindPasswordRequired',
-				array(&$this, '_isBindUserSet')
+				array(&$this, '_canBindCredentialed')
 			)
 		);
 		$this->addCheck(
@@ -175,22 +175,49 @@ class LDAPSettingsForm extends Form {
 	 */
 	function _canBindAnonymous($fieldValue) {
 		if ($fieldValue) {
+			// don't validate if the bind user is provided
 			return true;
 		}
-		// TODO: check if anoymous bind is possible
-		return true;
+		if (!$this->getData('ldapUrl')) {
+			// don't validate if the LDAP URL is missing
+			return true;
+		}
+		$ldapConn = $this->_plugin->_getLdapResource($this->getData('ldapUrl'));
+		if ($ldapConn) {
+			// try anonymous bind
+			if (ldap_bind($ldapConn)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
-	 * If no bind user is set, bind password must be set
+	 * If bind user and password is set, check bind credentials
 	 * @param $fieldValue mixed the value of the field being checked
 	 * @return boolean
 	 */
-	function _isBindUserSet($fieldValue) {
-		if ($fieldValue) {
+	function _canBindCredentialed($fieldValue) {
+		if (!$this->getData('ldapUrl')) {
+			// don't validate if the LDAP URL is missing
 			return true;
 		}
-		// TODO: check if bind user is set
-		return true;
+		if (!$fieldValue && !$this->getData('ldapBindUser')) {
+			// don't validate if no bind user is set and no bind password is set
+			return true;
+		}
+		if ($fieldValue && !$this->getData('ldapBindUser')) {
+			// fail if no bind user is specified
+			return false;
+		}
+		$ldapConn = $this->_plugin->_getLdapResource($this->getData('ldapUrl'));
+		if ($ldapConn) {
+			// try bind
+			if (ldap_bind($ldapConn, $this->getData('ldapBindUser'), $this->getData('ldapBindPassword'))) {
+				return true;
+			}
+		}
+		return false;
 	}
+
 }

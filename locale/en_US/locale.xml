@@ -31,10 +31,10 @@
 	<message key="plugins.generic.ldap.manager.settings.ldapFilter">Please enter the LDAP Filter that will be used to choose which accounts to use to login. You must include the string "%USER%" as the username who is logging in.</message>
 
 	<message key="plugins.generic.ldap.manager.settings.ldapBind">LDAP Bind</message>
-	<message key="plugins.generic.ldap.manager.settings.ldapBindUserRequired">Bind User is required.</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapBindUserRequired">Bind User is required (anonymous bind failed).</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapBindUser">Here you can specify the DN of the bind user that will be used for the LDAP search. This is required if your LDAP server does not allow anonymous access.</message>
 
-	<message key="plugins.generic.ldap.manager.settings.ldapBindPasswordRequired">Bind Password is required.</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapBindPasswordRequired">Bind Password is required (bind user/password failed).</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapBindPassword">Here you can specify the password of the bind user that will be used for the LDAP search. This is required if your LDAP server does not allow anonymous access.</message>
 	
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfService">LDAP Self Service</message>

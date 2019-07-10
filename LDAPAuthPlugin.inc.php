@@ -237,4 +237,25 @@ class LDAPAuthPlugin extends GenericPlugin {
 		}
 		return false;
 	}
+
+	/**
+	 * Get a LDAP resource for a server URI
+	 * @param $server string the server URI
+	 * @return resource|false
+	 */
+	function _getLdapResource($server) {
+		$ldapConn = ldap_connect($server);
+		if ($ldapConn) {
+			// set settings for making it work with AD
+			ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
+			ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
+
+			// use tls if not using ldaps
+			if (!preg_match('/ldaps.*636/', $server)) {
+				ldap_start_tls($ldapConn);
+			}
+			return $ldapConn;
+		}
+		return false;
+	}
 }
