@@ -23,12 +23,18 @@
 	<div id="description">{translate key="plugins.generic.ldap.manager.settings.description"}</div>
 
 	{fbvFormArea id="ldapSettingsFormArea"}
+	{fbvFormSection label="plugins.generic.ldap.manager.settings.ldapServer"}
 		{fbvElement id="ldapUrl" type="text" name="ldapUrl" value=$ldapUrl label="plugins.generic.ldap.manager.settings.ldapUrl"}
 		{fbvElement id="ldapSuffixSetting" type="text" name="ldapSuffix" value=$ldapSuffix label="plugins.generic.ldap.manager.settings.ldapSuffix"}
 		{fbvElement id="ldapFilterSetting" type="text" name="ldapFilter" value=$ldapFilter label="plugins.generic.ldap.manager.settings.ldapFilter"}
+	{/fbvFormSection}
+	{fbvFormSection label="plugins.generic.ldap.manager.settings.ldapBind"}
 		{fbvElement id="ldapBindUserSetting" type="text" name="ldapBindUser" value=$ldapBindUser label="plugins.generic.ldap.manager.settings.ldapBindUser"}
 		{fbvElement id="ldapBindPasswordSetting" type="text" name="ldapBindPassword" value=$ldapBindPassword label="plugins.generic.ldap.manager.settings.ldapBindPassword"}
+	{/fbvFormSection}
+	{fbvFormSection label="plugins.generic.ldap.manager.settings.ldapSelfService"}
 		{fbvElement id="ldapSelfServiceUrlSetting" type="text" name="ldapSelfServiceUrl" value=$ldapSelfServiceUrl label="plugins.generic.ldap.manager.settings.ldapSelfServiceUrl"}
+	{/fbvFormSection}
 	{/fbvFormArea}
 
 	{fbvFormButtons}

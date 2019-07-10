@@ -40,7 +40,7 @@ class LDAPSettingsForm extends Form {
 			new FormValidator(
 				$this,
 				'ldapUrl',
-				'required',
+				FORM_VALIDATOR_REQUIRED_VALUE,
 				'plugins.generic.ldap.manager.settings.ldapUrlRequired'
 			)
 		);
@@ -48,7 +48,7 @@ class LDAPSettingsForm extends Form {
 			new FormValidator(
 				$this,
 				'ldapSuffix',
-				'required',
+				FORM_VALIDATOR_REQUIRED_VALUE,
 				'plugins.generic.ldap.manager.settings.ldapSuffixRequired'
 			)
 		);
@@ -56,31 +56,33 @@ class LDAPSettingsForm extends Form {
 			new FormValidator(
 				$this,
 				'ldapFilter',
-				'required',
+				FORM_VALIDATOR_REQUIRED_VALUE,
 				'plugins.generic.ldap.manager.settings.ldapFilterRequired'
 			)
 		);
 		$this->addCheck(
-			new FormValidator(
+			new FormValidatorCustom(
 				$this,
 				'ldapBindUser',
-				'',
-				'plugins.generic.ldap.manager.settings.ldapBindUserRequired'
+				FORM_VALIDATOR_OPTIONAL_VALUE,
+				'plugins.generic.ldap.manager.settings.ldapBindUserRequired',
+				array(&$this, '_canBindAnonymous')
 			)
 		);
 		$this->addCheck(
-			new FormValidator(
+			new FormValidatorCustom(
 				$this,
 				'ldapBindPassword',
-				'',
-				'plugins.generic.ldap.manager.settings.ldapBindPasswordRequired'
+				FORM_VALIDATOR_OPTIONAL_VALUE,
+				'plugins.generic.ldap.manager.settings.ldapBindPasswordRequired',
+				array(&$this, '_isBindUserSet')
 			)
 		);
 		$this->addCheck(
 			new FormValidator(
 				$this,
 				'ldapSelfServiceUrl',
-				'required',
+				FORM_VALIDATOR_REQUIRED_VALUE,
 				'plugins.generic.ldap.manager.settings.ldapSelfServiceUrlRequired'
 			)
 		);
@@ -164,5 +166,31 @@ class LDAPSettingsForm extends Form {
 			trim($this->getData('ldapSelfServiceUrl'), "\"\';"),
 			'string'
 		);
+	}
+
+	/**
+	 * If no bind user / password is given, check whether anonymous bind is possible
+	 * @param $fieldValue mixed the value of the field being checked
+	 * @return boolean
+	 */
+	function _canBindAnonymous($fieldValue) {
+		if ($fieldValue) {
+			return true;
+		}
+		// TODO: check if anoymous bind is possible
+		return true;
+	}
+
+	/**
+	 * If no bind user is set, bind password must be set
+	 * @param $fieldValue mixed the value of the field being checked
+	 * @return boolean
+	 */
+	function _isBindUserSet($fieldValue) {
+		if ($fieldValue) {
+			return true;
+		}
+		// TODO: check if bind user is set
+		return true;
 	}
 }
