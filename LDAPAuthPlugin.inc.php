@@ -29,6 +29,9 @@ class LDAPAuthPlugin extends GenericPlugin {
 
 	/** @var bool */
 	var $_globallyEnabled;
+	
+	/** @var bool */
+	var $_singleContext;
 
 	/**
 	 * @copydoc Plugin::__construct()
@@ -37,6 +40,12 @@ class LDAPAuthPlugin extends GenericPlugin {
 		parent::__construct();
 		$this->_contextId = $this->getCurrentContextId();
 		$this->_globallyEnabled = $this->getSetting(0, 'enabled');
+		$this->_singleContext = true;
+		$contextDao = Application::getContextDAO();
+		$workingContexts = $contextDao->getAvailable();
+		if ($workingContexts && $workingContexts->getCount() > 1) {
+			$this->_singleContext = false;
+		}
 	}
 
 	/**
@@ -124,7 +133,7 @@ class LDAPAuthPlugin extends GenericPlugin {
 	 */
 	function getSetting($contextId, $name) {
 		if ($this->_globallyEnabled) {
-			return parent::getSetting(0, $name);
+			return parent::getSetting(CONTEXT_SITE, $name);
 		} else {
 			return parent::getSetting($contextId, $name);
 		}
@@ -176,23 +185,47 @@ class LDAPAuthPlugin extends GenericPlugin {
 	 * @copydoc LazyLoadPlugin::getCanEnable()
 	 */
 	function getCanEnable() {
-		return !$this->_globallyEnabled || $this->_contextId == 0;
+		return !$this->_globallyEnabled || $this->_contextId == CONTEXT_SITE || $this->_singleContext;
 	}
 
 	/**
 	 * @copydoc LazyLoadPlugin::getCanDisable()
 	 */
 	function getCanDisable() {
-		return !$this->_globallyEnabled || $this->_contextId == 0;
+		return !$this->_globallyEnabled || $this->_contextId == CONTEXT_SITE || $this->_singleContext;
 	}
 
 	/**
-	 * @copydoc LazyLoadPlugin::setEnabled()
+	 * Override LazyLoadPlugin::setEnabled() to allow for enabling of
+	 * this sitewide plugin within an individual context
+	 * @param $enabled boolean
 	 */
 	function setEnabled($enabled) {
-		$this->updateSetting($this->_contextId, 'enabled', $enabled, 'bool');
+		if ($this->_singleContext) {
+			// LazyLoadPlugin::setEnabled will force the context to CONTEXT_SITE when isSitePlugin returns true
+			parent::setEnabled($enabled);
+		} else {
+			// if there are multiple contexts, allow enabling/disabling at the context level
+			$this->updateSetting($this->_contextId, 'enabled', $enabled, 'bool');
+		}
 	}
 
+	/**
+	 * Override LazyLoadPlugin::getEnabled() to allow for enabling of
+	 * this sitewide plugin within an individual context
+	 * @param $contextId integer
+	 * @return boolean
+	 */
+	function getEnabled($contextId = null) {
+		if ($contextId == null) {
+			$contextId = $this->getCurrentContextId();
+			// LazyLoadPlugin::getEnabled just asks here if this is a site plugin
+			if ($this->_globallyEnabled || $this->_singleContext) {
+				$contextId = CONTEXT_SITE;
+			}
+		}
+		return $this->getSetting($contextId, 'enabled');
+	}
 
 	//
 	// Callback handler
