@@ -37,11 +37,12 @@ class LDAPSettingsForm extends Form {
 		parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
 
 		$this->addCheck(
-			new FormValidator(
+			new FormValidatorCustom(
 				$this,
 				'ldapUrl',
 				FORM_VALIDATOR_REQUIRED_VALUE,
-				'plugins.generic.ldap.manager.settings.ldapUrlRequired'
+				'plugins.generic.ldap.manager.settings.ldapUrlRequired',
+				create_function('$s', 'return (preg_match("|^ldaps?://.+$|i", $s) === 1);')
 			)
 		);
 		$this->addCheck(
@@ -53,11 +54,12 @@ class LDAPSettingsForm extends Form {
 			)
 		);
 		$this->addCheck(
-			new FormValidator(
+			new FormValidatorCustom(
 				$this,
 				'ldapFilter',
 				FORM_VALIDATOR_REQUIRED_VALUE,
-				'plugins.generic.ldap.manager.settings.ldapFilterRequired'
+				'plugins.generic.ldap.manager.settings.ldapFilterRequired',
+				create_function('$s', 'return (preg_match("/^[(].+%USER%.*[)]$/", $s) === 1);')
 			)
 		);
 		$this->addCheck(
@@ -79,7 +81,7 @@ class LDAPSettingsForm extends Form {
 			)
 		);
 		$this->addCheck(
-			new FormValidator(
+			new FormValidatorUrl(
 				$this,
 				'ldapSelfServiceUrl',
 				FORM_VALIDATOR_REQUIRED_VALUE,
@@ -120,7 +122,7 @@ class LDAPSettingsForm extends Form {
 	 * Fetch the form.
 	 * @copydoc Form::fetch()
 	 */
-	function fetch($request) {
+	function fetch($request, $template = NULL, $display = false) {
 		$templateMgr = TemplateManager::getManager($request);
 		$templateMgr->assign('pluginName', $this->_plugin->getName());
 		return parent::fetch($request);
