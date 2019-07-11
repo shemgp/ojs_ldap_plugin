@@ -22,22 +22,28 @@
 
 	<message key="plugins.generic.ldap.manager.settings.ldapServer">LDAP Server</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapUrlRequired">LDAP Url is required.</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapUrlPlaceholder">ldaps://ldap.school.edu:636</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapUrl">Please enter the LDAP Url which may have ldaps:// and :636.</message>
 
 	<message key="plugins.generic.ldap.manager.settings.ldapSuffixRequired">LDAP base DN is required.</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapSuffixPlaceholder">dc=school,dc=edu</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapSuffix">Please enter the LDAP base DN where the search should start for users.</message>
 
 	<message key="plugins.generic.ldap.manager.settings.ldapFilterRequired">LDAP Filter is required.</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapFilterPlaceholder">(&amp;(objectClass=user)(sAMAccountName=%USER%))</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapFilter">Please enter the LDAP Filter that will be used to choose which accounts to use to login. You must include the string "%USER%" as the username who is logging in.</message>
 
 	<message key="plugins.generic.ldap.manager.settings.ldapBind">LDAP Bind</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapBindUserRequired">Bind User is required (anonymous bind failed).</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapBindUserPlaceholder">cn=Administrator,ou=Users,dc=school,dc=edu</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapBindUser">Here you can specify the DN of the bind user that will be used for the LDAP search. This is required if your LDAP server does not allow anonymous access.</message>
 
 	<message key="plugins.generic.ldap.manager.settings.ldapBindPasswordRequired">Bind Password is required (bind user/password failed).</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapBindPasswordPlaceholder">secret</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapBindPassword">Here you can specify the password of the bind user that will be used for the LDAP search. This is required if your LDAP server does not allow anonymous access.</message>
 	
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfService">LDAP Self Service</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfServiceUrlRequired">Self Service URL is required</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapSelfServiceUrlPlaceholder">https://self-service.school.edu/</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfServiceUrl">The LDAP Self Service URL where LDAP users can activate and change their password.</message>
 </locale>
