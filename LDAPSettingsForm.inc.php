@@ -37,50 +37,54 @@ class LDAPSettingsForm extends Form {
 		parent::__construct($plugin->getTemplateResource('settingsForm.tpl'));
 
 		$this->addCheck(
-			new FormValidator(
+			new FormValidatorCustom(
 				$this,
 				'ldapUrl',
-				'required',
-				'plugins.generic.ldap.manager.settings.ldapUrlRequired'
+				FORM_VALIDATOR_REQUIRED_VALUE,
+				'plugins.generic.ldap.manager.settings.ldapUrlRequired',
+				create_function('$s', 'return (preg_match("|^ldaps?://.+$|i", $s) === 1);')
 			)
 		);
 		$this->addCheck(
 			new FormValidator(
 				$this,
 				'ldapSuffix',
-				'required',
+				FORM_VALIDATOR_REQUIRED_VALUE,
 				'plugins.generic.ldap.manager.settings.ldapSuffixRequired'
 			)
 		);
 		$this->addCheck(
-			new FormValidator(
+			new FormValidatorCustom(
 				$this,
 				'ldapFilter',
-				'required',
-				'plugins.generic.ldap.manager.settings.ldapFilterRequired'
+				FORM_VALIDATOR_REQUIRED_VALUE,
+				'plugins.generic.ldap.manager.settings.ldapFilterRequired',
+				create_function('$s', 'return (preg_match("/^[(].+%USER%.*[)]$/", $s) === 1);')
 			)
 		);
 		$this->addCheck(
-			new FormValidator(
+			new FormValidatorCustom(
 				$this,
 				'ldapBindUser',
-				'',
-				'plugins.generic.ldap.manager.settings.ldapBindUserRequired'
+				FORM_VALIDATOR_OPTIONAL_VALUE,
+				'plugins.generic.ldap.manager.settings.ldapBindUserRequired',
+				array(&$this, '_canBindAnonymous')
 			)
 		);
 		$this->addCheck(
-			new FormValidator(
+			new FormValidatorCustom(
 				$this,
 				'ldapBindPassword',
-				'',
-				'plugins.generic.ldap.manager.settings.ldapBindPasswordRequired'
+				FORM_VALIDATOR_REQUIRED_VALUE,
+				'plugins.generic.ldap.manager.settings.ldapBindPasswordRequired',
+				array(&$this, '_canBindCredentialed')
 			)
 		);
 		$this->addCheck(
-			new FormValidator(
+			new FormValidatorUrl(
 				$this,
 				'ldapSelfServiceUrl',
-				'required',
+				FORM_VALIDATOR_REQUIRED_VALUE,
 				'plugins.generic.ldap.manager.settings.ldapSelfServiceUrlRequired'
 			)
 		);
@@ -118,7 +122,7 @@ class LDAPSettingsForm extends Form {
 	 * Fetch the form.
 	 * @copydoc Form::fetch()
 	 */
-	function fetch($request) {
+	function fetch($request, $template = NULL, $display = false) {
 		$templateMgr = TemplateManager::getManager($request);
 		$templateMgr->assign('pluginName', $this->_plugin->getName());
 		return parent::fetch($request);
@@ -165,4 +169,57 @@ class LDAPSettingsForm extends Form {
 			'string'
 		);
 	}
+
+	/**
+	 * If no bind user / password is given, check whether anonymous bind is possible
+	 * @param $fieldValue mixed the value of the field being checked
+	 * @return boolean
+	 */
+	function _canBindAnonymous($fieldValue) {
+		if ($fieldValue) {
+			// don't validate if the bind user is provided
+			return true;
+		}
+		if (!$this->getData('ldapUrl')) {
+			// don't validate if the LDAP URL is missing
+			return true;
+		}
+		$ldapConn = $this->_plugin->_getLdapResource($this->getData('ldapUrl'));
+		if ($ldapConn) {
+			// try anonymous bind
+			if (ldap_bind($ldapConn)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * If bind user and password is set, check bind credentials
+	 * @param $fieldValue mixed the value of the field being checked
+	 * @return boolean
+	 */
+	function _canBindCredentialed($fieldValue) {
+		if (!$this->getData('ldapUrl')) {
+			// don't validate if the LDAP URL is missing
+			return true;
+		}
+		if (!$fieldValue && !$this->getData('ldapBindUser')) {
+			// don't validate if no bind user is set and no bind password is set
+			return true;
+		}
+		if ($fieldValue && !$this->getData('ldapBindUser')) {
+			// fail if no bind user is specified
+			return false;
+		}
+		$ldapConn = $this->_plugin->_getLdapResource($this->getData('ldapUrl'));
+		if ($ldapConn) {
+			// try bind
+			if (ldap_bind($ldapConn, $this->getData('ldapBindUser'), $this->getData('ldapBindPassword'))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

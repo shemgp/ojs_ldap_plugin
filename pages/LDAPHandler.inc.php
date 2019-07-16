@@ -115,24 +115,13 @@ class LDAPHandler extends Handler {
 
 		// try to connect
 		$username = $input['username'];
-		$ldapConn = ldap_connect($ldapUrl);
-		if (!$ldapConn)
-			die('Unable to connect to ldap: '.$ldapUrl);
-
-		// set settings for making it work with AD
-		ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
-		ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
-
-		// use tls if not using ldaps
-		if (!preg_match('/ldaps.*636/', $ldapUrl))
-			ldap_start_tls($ldapConn);
-
+		$ldapConn = $this->_plugin->_getLdapResource($ldapUrl);
 
 		// try anonymous bind
 		$ldapBind = null;
 		if (!$ldapBindUser && !$ldapBindPassword)
 		{
-			$ldapBind = ldap_bind($ldapConn, $username, $input['password']);
+			$ldapBind = ldap_bind($ldapConn);
 		}
 		// try admin bind
 		else
