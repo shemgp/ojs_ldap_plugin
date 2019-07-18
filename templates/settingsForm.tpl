@@ -36,9 +36,9 @@
 		{fbvElement id="ldapSelfServiceUrlSetting" type="text" name="ldapSelfServiceUrl" value=$ldapSelfServiceUrl label="plugins.generic.ldap.manager.settings.ldapSelfServiceUrl" placeholder="plugins.generic.ldap.manager.settings.ldapSelfServiceUrlPlaceholder"}
 	{/fbvFormSection}
 	{fbvFormSection label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder" list=true}
-		{fbvElement type="radio" id="ldapLocalLoginOrderBefore" name="ldapLocalLoginOrder" value="before" checked=$ldapLocalLoginOrder|compare:"before" label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.before"}
-		{fbvElement type="radio" id="ldapLocalLoginOrderAfter" name="ldapLocalLoginOrder" value="after" checked=$ldapLocalLoginOrder|default:true|compare:"after" label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.after"}
-		{fbvElement type="radio" id="ldapLocalLoginOrderNone" name="ldapLocalLoginOrder" value="never" checked=$ldapLocalLoginOrder|compare:"never" label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.never"}
+		{fbvElement type="radio" id="ldapLocalLoginOrderBefore" name="ldapLocalLoginOrder" value=LDAPAUTH_LOCAL_BEFORE checked=$ldapLocalLoginOrder|compare:LDAPAUTH_LOCAL_BEFORE label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.before"}
+		{fbvElement type="radio" id="ldapLocalLoginOrderAfter" name="ldapLocalLoginOrder" value=LDAPAUTH_LOCAL_AFTER checked=$ldapLocalLoginOrder|default:true|compare:LDAPAUTH_LOCAL_AFTER label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.after"}
+		{fbvElement type="radio" id="ldapLocalLoginOrderNone" name="ldapLocalLoginOrder" value=LDAPAUTH_LOCAL_NEVER checked=$ldapLocalLoginOrder|compare:LDAPAUTH_LOCAL_NEVER label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.never"}
 	{/fbvFormSection}
 	{/fbvFormArea}
 

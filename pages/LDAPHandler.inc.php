@@ -94,7 +94,7 @@ class LDAPHandler extends LoginHandler {
 
 		// check csrf
 		if ($input['csrfToken'] != $request->getSession()->getCSRFToken())
-            return $request->redirectHome();
+			return $request->redirectHome();
 
 		// get data from settings
 		$this->_plugin = $this->_getPlugin();
@@ -125,11 +125,15 @@ class LDAPHandler extends LoginHandler {
 		);
 
 		// test if normal user login will work before testing LDAP
-		if ($ldapLocalLoginOrder == "before" && $ldapLocalLoginOrder != "never" && $ldapLocalLoginOrder != "")
-			parent::signIn($args, $request);
+		$username = $input['username'];
+		if ($ldapLocalLoginOrder == LDAPAUTH_LOCAL_BEFORE)
+		{
+			$result = Validation::login($username, $input['password'], $reason, $input['remember']);
+			if ($result)
+				return $this->_redirectAfterLogin($request);
+		}
 
 		// try to connect
-		$username = $input['username'];
 		$ldapConn = $this->_plugin->_getLdapResource($ldapUrl);
 
 		// try anonymous bind
@@ -160,10 +164,10 @@ class LDAPHandler extends LoginHandler {
 				if (@ldap_bind($ldapConn, $data['dn'], $input['password']))
 				{
 					$authDao = DAORegistry::getDAO('AuthSourceDAO');
-                        $this->defaultAuth = $authDao->getDefaultPlugin();
+					$this->defaultAuth = $authDao->getDefaultPlugin();
 
-					$userDao = DAORegistry::getDAO('UserDAO');
 					// test if user exists in database
+					$userDao = DAORegistry::getDAO('UserDAO');
 					$user = $userDao->getByUsername($username);
 					if ($user)
 					{
@@ -177,13 +181,13 @@ class LDAPHandler extends LoginHandler {
 					// add user to default group so user will show up in "user & roles"
 					if ($user)
 					{
-                        $roles = $user->getRoles($this->_contextId);
-                        if (count($roles) == 0)
-                        {
-                            $userGroupDao = DAORegistry::getDAO('UserGroupDAO');
-                            $defaultReaderGroup = $userGroupDao->getDefaultByRoleId($this->_contextId, ROLE_ID_READER);
-                            if ($defaultReaderGroup) $userGroupDao->assignUserToGroup($user->getId(), $defaultReaderGroup->getId(), $this->_contextId);
-                        }
+						$roles = $user->getRoles($this->_contextId);
+						if (count($roles) == 0)
+						{
+							$userGroupDao = DAORegistry::getDAO('UserGroupDAO');
+							$defaultReaderGroup = $userGroupDao->getDefaultByRoleId($this->_contextId, ROLE_ID_READER);
+							if ($defaultReaderGroup) $userGroupDao->assignUserToGroup($user->getId(), $defaultReaderGroup->getId(), $this->_contextId);
+						}
 					}
 
 					$result = Validation::login($username, $input['password'], $reason, $input['remember']);
@@ -191,36 +195,33 @@ class LDAPHandler extends LoginHandler {
 					if ($result)
 						return $this->_redirectAfterLogin($request);
 				}
-				else
-				{
-					Validation::logout();
-				}
+				Validation::logout();
 			}
 		}
 
 		// test if normal user login will work after testing LDAP
 		// if $ldapLocalLoginOrder is not set, then default to trying local login
-        if ($ldapLocalLoginOrder == "after" && $ldapLocalLoginOrder != "never" || $ldapLocalLoginOrder == "")
-        {
+		if ($ldapLocalLoginOrder == LDAPAUTH_LOCAL_AFTER || $ldapLocalLoginOrder == "")
+		{
 			parent::signIn($args, $request);
-        }
+		}
 
-        // display error message if LDAP login had error
-        if ($ldapLocalLoginOrder == "never")
-        {
-            $sessionManager = SessionManager::getManager();
-            $session = $sessionManager->getUserSession();
-            $templateMgr = TemplateManager::getManager($request);
-            $templateMgr->assign(array(
-                'username' => $request->getUserVar('username'),
-                'remember' => $request->getUserVar('remember'),
-                'source' => $request->getUserVar('source'),
-                'showRemember' => Config::getVar('general', 'session_lifetime') > 0,
-                'error' => $reason===null?'user.login.loginError':($reason===''?'user.login.accountDisabled':'user.login.accountDisabledWithReason'),
-                'reason' => $reason,
-            ));
-            $templateMgr->display('frontend/pages/userLogin.tpl');
-        }
+		// display error message if LDAP login had error
+		if ($ldapLocalLoginOrder == LDAPAUTH_LOCAL_NEVER)
+		{
+			$sessionManager = SessionManager::getManager();
+			$session = $sessionManager->getUserSession();
+			$templateMgr = TemplateManager::getManager($request);
+			$templateMgr->assign(array(
+				'username' => $request->getUserVar('username'),
+				'remember' => $request->getUserVar('remember'),
+				'source' => $request->getUserVar('source'),
+				'showRemember' => Config::getVar('general', 'session_lifetime') > 0,
+				'error' => $reason===null?'user.login.loginError':($reason===''?'user.login.accountDisabled':'user.login.accountDisabledWithReason'),
+				'reason' => $reason,
+			));
+			$templateMgr->display('frontend/pages/userLogin.tpl');
+		}
 	}
 
 	/**

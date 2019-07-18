@@ -15,6 +15,10 @@
  *
  */
 
+define('LDAPAUTH_LOCAL_BEFORE', "before");
+define('LDAPAUTH_LOCAL_AFTER', "after");
+define('LDAPAUTH_LOCAL_NEVER', "never");
+
 import('lib.pkp.classes.plugins.GenericPlugin');
 
 class LDAPAuthPlugin extends GenericPlugin {
