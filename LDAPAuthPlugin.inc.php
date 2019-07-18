@@ -236,28 +236,40 @@ class LDAPAuthPlugin extends GenericPlugin {
 	 * @see PKPPageRouter::route()
 	 */
 	function handleRequest($hookName, $params) {
+		$ldapSelfServiceUrl = $this->getSetting(
+                        $this->_contextId,
+                        'ldapSelfServiceUrl'
+		);
+		$overrideLoginPages = array(
+			'signIn'
+		);
+		$overrideUserPages = array();
+		if (trim($ldapSelfServiceUrl) != "")
+		{
+			$overrideLoginPages += array(
+				'changePassword',
+				'lostPassword',
+				'requestResetPassword',
+				'savePassword'
+			);
+			$overrideUserPages += array(
+				'activateUser',
+				'validate',
+			);
+		}
 		$page = $params[0];
 		$op = $params[1];
 		if ($this->getEnabled()
 			&& ($page == 'ldap'
 				|| ($page == 'login'
-					&& array_search(
+					&& in_array(
 						$op,
-						array(
-							'changePassword',
-							'lostPassword',
-							'requestResetPassword',
-							'savePassword',
-							'signIn',
-						)
+						$overrideLoginPages
 					))
 				|| ($page == 'user'
-					&& array_search(
+					&& in_array(
 						$op,
-						array(
-							'activateUser',
-							'validate',
-						)
+						$overrideUserPages
 					)
 				)
 			)

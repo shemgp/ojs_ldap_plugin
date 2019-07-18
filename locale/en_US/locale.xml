@@ -45,5 +45,5 @@
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfService">LDAP Self Service</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfServiceUrlRequired">Self Service URL is required</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfServiceUrlPlaceholder">https://self-service.school.edu/</message>
-	<message key="plugins.generic.ldap.manager.settings.ldapSelfServiceUrl">The LDAP Self Service URL where LDAP users can activate and change their password.</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapSelfServiceUrl">The LDAP Self Service URL is where LDAP users can activate and change their password.</message>
 </locale>

@@ -84,7 +84,7 @@ class LDAPSettingsForm extends Form {
 			new FormValidatorUrl(
 				$this,
 				'ldapSelfServiceUrl',
-				FORM_VALIDATOR_REQUIRED_VALUE,
+				FORM_VALIDATOR_OPTIONAL_VALUE,
 				'plugins.generic.ldap.manager.settings.ldapSelfServiceUrlRequired'
 			)
 		);
