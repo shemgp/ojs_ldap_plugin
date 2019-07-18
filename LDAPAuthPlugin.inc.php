@@ -29,7 +29,7 @@ class LDAPAuthPlugin extends GenericPlugin {
 
 	/** @var bool */
 	var $_globallyEnabled;
-	
+
 	/** @var bool */
 	var $_singleContext;
 
@@ -229,7 +229,7 @@ class LDAPAuthPlugin extends GenericPlugin {
 
 	//
 	// Callback handler
-	// 
+	//
 	/**
 	 * Hook callback: register pages for each login method.
 	 * This URL is of the form: ldap/{$ldaprequest}

@@ -88,6 +88,14 @@ class LDAPSettingsForm extends Form {
 				'plugins.generic.ldap.manager.settings.ldapSelfServiceUrlRequired'
 			)
 		);
+		$this->addCheck(
+			new FormValidatorUrl(
+				$this,
+				'ldapLocalLoginOrder',
+				FORM_VALIDATOR_REQUIRED_VALUE,
+				'plugins.generic.ldap.manager.settings.ldapLocalLoginOrderRequired'
+			)
+		);
 		$this->addCheck(new FormValidatorPost($this));
 		$this->addCheck(new FormValidatorCSRF($this));
 	}
@@ -103,6 +111,7 @@ class LDAPSettingsForm extends Form {
 			'ldapBindUser' => $this->_plugin->getSetting($this->_contextId, 'ldapBindUser'),
 			'ldapBindPassword' => $this->_plugin->getSetting($this->_contextId, 'ldapBindPassword'),
 			'ldapSelfServiceUrl' => $this->_plugin->getSetting($this->_contextId, 'ldapSelfServiceUrl'),
+			'ldapLocalLoginOrder' => $this->_plugin->getSetting($this->_contextId, 'ldapLocalLoginOrder'),
 		);
 	}
 
@@ -116,6 +125,7 @@ class LDAPSettingsForm extends Form {
 		$this->readUserVars(array('ldapBindUser'));
 		$this->readUserVars(array('ldapBindPassword'));
 		$this->readUserVars(array('ldapSelfServiceUrl'));
+		$this->readUserVars(array('ldapLocalLoginOrder'));
 	}
 
 	/**
@@ -166,6 +176,12 @@ class LDAPSettingsForm extends Form {
 			$this->_contextId,
 			'ldapSelfServiceUrl',
 			trim($this->getData('ldapSelfServiceUrl'), "\"\';"),
+			'string'
+		);
+		$this->_plugin->updateSetting(
+			$this->_contextId,
+			'ldapLocalLoginOrder',
+			trim($this->getData('ldapLocalLoginOrder'), "\"\';"),
 			'string'
 		);
 	}

@@ -12,7 +12,7 @@
   * Localization strings for the en_US (U.S. English) locale.
   *
   -->
- 
+
 <locale name="en_US" full_name="U.S. English">
 	<message key="plugins.generic.ldap.displayName">LDAP Authentication Plugin</message>
 	<message key="plugins.generic.ldap.description">This plugin allows third-party authentication via a LDAP service.</message>
@@ -41,9 +41,14 @@
 	<message key="plugins.generic.ldap.manager.settings.ldapBindPasswordRequired">Bind Password is required (bind user/password failed).</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapBindPasswordPlaceholder">secret</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapBindPassword">Here you can specify the password of the bind user that will be used for the LDAP search. This is required if your LDAP server does not allow anonymous access.</message>
-	
+
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfService">LDAP Self Service</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfServiceUrlRequired">Self Service URL is required</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfServiceUrlPlaceholder">https://self-service.school.edu/</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapSelfServiceUrl">The LDAP Self Service URL is where LDAP users can activate and change their password.</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder">Call Local Login</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapLocalLoginOrderRequired">Call Local Login is required</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.before">Before LDAP Login</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.after">After LDAP Login</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.none">Never</message>
 </locale>

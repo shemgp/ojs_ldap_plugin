@@ -25,7 +25,7 @@ class LDAPHandler extends LoginHandler {
 
 	/**
 	 * Intercept normal login/registration requests; defer to LDAP.
-	 * 
+	 *
 	 * @param $args array
 	 * @param $request Request
 	 * @return bool
@@ -94,7 +94,7 @@ class LDAPHandler extends LoginHandler {
 
 		// check csrf
 		if ($input['csrfToken'] != $request->getSession()->getCSRFToken())
-			die('Please refresh form.');
+            return $request->redirectHome();
 
 		// get data from settings
 		$this->_plugin = $this->_getPlugin();
@@ -119,6 +119,14 @@ class LDAPHandler extends LoginHandler {
 			$this->_contextId,
 			'ldapBindPassword'
 		);
+		$ldapLocalLoginOrder = $this->_plugin->getSetting(
+			$this->_contextId,
+			'ldapLocalLoginOrder'
+		);
+
+		// test if normal user login will work before testing LDAP
+		if ($ldapLocalLoginOrder == "before" && $ldapLocalLoginOrder != "never" && $ldapLocalLoginOrder != "")
+			parent::signIn($args, $request);
 
 		// try to connect
 		$username = $input['username'];
@@ -149,20 +157,35 @@ class LDAPHandler extends LoginHandler {
 				$sn = $data['sn'][0]??null;
 
 				// test password
-				if (ldap_bind($ldapConn, $data['dn'], $input['password']))
+				if (@ldap_bind($ldapConn, $data['dn'], $input['password']))
 				{
+					$authDao = DAORegistry::getDAO('AuthSourceDAO');
+                        $this->defaultAuth = $authDao->getDefaultPlugin();
+
 					$userDao = DAORegistry::getDAO('UserDAO');
 					// test if user exists in database
 					$user = $userDao->getByUsername($username);
 					if ($user)
 					{
-						$this->_updateUserInfoFromLDAP($userDao, $user, $input['password'], $data['mail'][0], $givenName, $sn, $data['telephonenumber'][0]??null, $data['streetaddress'][0]??null);
+						$user = $this->_updateUserInfoFromLDAP($userDao, $user, $input['password'], $data['mail'][0], $givenName, $sn, $data['telephonenumber'][0]??null, $data['streetaddress'][0]??null);
 					}
 					// user doesn't exist so create it in database
 					else
 					{
-						$this->_registerFromLDAP($userDao, $username, $input['password'], $data['mail'][0], $givenName, $sn, $data['telephonenumber'][0]??null, $data['streetaddress'][0]??null);
+						$user = $this->_registerFromLDAP($userDao, $username, $input['password'], $data['mail'][0], $givenName, $sn, $data['telephonenumber'][0]??null, $data['streetaddress'][0]??null);
 					}
+					// add user to default group so user will show up in "user & roles"
+					if ($user)
+					{
+                        $roles = $user->getRoles($this->_contextId);
+                        if (count($roles) == 0)
+                        {
+                            $userGroupDao = DAORegistry::getDAO('UserGroupDAO');
+                            $defaultReaderGroup = $userGroupDao->getDefaultByRoleId($this->_contextId, ROLE_ID_READER);
+                            if ($defaultReaderGroup) $userGroupDao->assignUserToGroup($user->getId(), $defaultReaderGroup->getId(), $this->_contextId);
+                        }
+					}
+
 					$result = Validation::login($username, $input['password'], $reason, $input['remember']);
 
 					if ($result)
@@ -174,8 +197,30 @@ class LDAPHandler extends LoginHandler {
 				}
 			}
 		}
-		// test if normal user login will work
-		parent::signIn($args, $request);
+
+		// test if normal user login will work after testing LDAP
+		// if $ldapLocalLoginOrder is not set, then default to trying local login
+        if ($ldapLocalLoginOrder == "after" && $ldapLocalLoginOrder != "never" || $ldapLocalLoginOrder == "")
+        {
+			parent::signIn($args, $request);
+        }
+
+        // display error message if LDAP login had error
+        if ($ldapLocalLoginOrder == "never")
+        {
+            $sessionManager = SessionManager::getManager();
+            $session = $sessionManager->getUserSession();
+            $templateMgr = TemplateManager::getManager($request);
+            $templateMgr->assign(array(
+                'username' => $request->getUserVar('username'),
+                'remember' => $request->getUserVar('remember'),
+                'source' => $request->getUserVar('source'),
+                'showRemember' => Config::getVar('general', 'session_lifetime') > 0,
+                'error' => $reason===null?'user.login.loginError':($reason===''?'user.login.accountDisabled':'user.login.accountDisabledWithReason'),
+                'reason' => $reason,
+            ));
+            $templateMgr->display('frontend/pages/userLogin.tpl');
+        }
 	}
 
 	/**
@@ -191,7 +236,7 @@ class LDAPHandler extends LoginHandler {
 	//
 	/**
 	 * Get the LDAP plugin object
-	 * 
+	 *
 	 * @return LDAPAuthPlugin
 	 */
 	function _getPlugin() {
@@ -236,6 +281,13 @@ class LDAPHandler extends LoginHandler {
 			$user->setMailingAddress($address);
 		}
 
+		if (isset($this->defaultAuth)) {
+            $user->setPassword($password);
+            // FIXME Check result and handle failures
+            $this->defaultAuth->doCreateUser($user);
+            $user->setAuthId($this->defaultAuth->authId);
+        }
+
 		$user->setPassword(
 			Validation::encryptCredentials(
 				$username,
@@ -274,6 +326,13 @@ class LDAPHandler extends LoginHandler {
 		}
 
 		$user->setDateRegistered(Core::getCurrentDate());
+		if (isset($this->defaultAuth)) {
+            $user->setPassword($password);
+            // FIXME Check result and handle failures
+            $this->defaultAuth->doCreateUser($user);
+            $user->setAuthId($this->defaultAuth->authId);
+        }
+
 		$user->setPassword(
 			Validation::encryptCredentials(
 				$username,
@@ -292,21 +351,21 @@ class LDAPHandler extends LoginHandler {
 
 	/**
 	 * Intercept normal login/registration requests; defer to LAM.
-	 * 
+	 *
 	 * @param $request Request
 	 * @return bool
 	 */
 	function _ldapRedirect($request) {
 		$this->_plugin = $this->_getPlugin();
 		$this->_contextId = $this->_plugin->getCurrentContextId();
-                $ldapSelfServiceUrl = $this->_plugin->getSetting(
-                        $this->_contextId,
-                        'ldapSelfServiceUrl'
+            $ldapSelfServiceUrl = $this->_plugin->getSetting(
+                $this->_contextId,
+                'ldapSelfServiceUrl'
 		);
 		if ($ldapSelfServiceUrl)
 			return $request->redirectUrl($ldapSelfServiceUrl);
 		return $request->redirectHome();
-	} 
+	}
 
 	/**
 	 * Return current Locale
@@ -315,10 +374,10 @@ class LDAPHandler extends LoginHandler {
 	 */
 	function _getCurrentLocale()
 	{
-                $request = Application::getRequest();
-                $site = $request->getSite();
-                $sitePrimaryLocale = $site->getPrimaryLocale();
-                $currentLocale = AppLocale::getLocale();
+        $request = Application::getRequest();
+        $site = $request->getSite();
+        $sitePrimaryLocale = $site->getPrimaryLocale();
+        $currentLocale = AppLocale::getLocale();
 		return $currentLocale;
 	}
 }
