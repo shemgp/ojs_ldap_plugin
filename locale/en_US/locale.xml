@@ -50,5 +50,5 @@
 	<message key="plugins.generic.ldap.manager.settings.ldapLocalLoginOrderRequired">Call Local Login is required</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.before">Before LDAP Login</message>
 	<message key="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.after">After LDAP Login</message>
-	<message key="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.none">Never</message>
+	<message key="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.never">Never</message>
 </locale>

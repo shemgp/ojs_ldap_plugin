@@ -38,7 +38,7 @@
 	{fbvFormSection label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder" list=true}
 		{fbvElement type="radio" id="ldapLocalLoginOrderBefore" name="ldapLocalLoginOrder" value="before" checked=$ldapLocalLoginOrder|compare:"before" label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.before"}
 		{fbvElement type="radio" id="ldapLocalLoginOrderAfter" name="ldapLocalLoginOrder" value="after" checked=$ldapLocalLoginOrder|default:true|compare:"after" label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.after"}
-		{fbvElement type="radio" id="ldapLocalLoginOrderNone" name="ldapLocalLoginOrder" value="never" checked=$ldapLocalLoginOrder|compare:"none" label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.none"}
+		{fbvElement type="radio" id="ldapLocalLoginOrderNone" name="ldapLocalLoginOrder" value="never" checked=$ldapLocalLoginOrder|compare:"never" label="plugins.generic.ldap.manager.settings.ldapLocalLoginOrder.never"}
 	{/fbvFormSection}
 	{/fbvFormArea}
 
