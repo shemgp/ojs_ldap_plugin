@@ -88,6 +88,14 @@ class LDAPSettingsForm extends Form {
 				'plugins.generic.ldap.manager.settings.ldapSelfServiceUrlRequired'
 			)
 		);
+		$this->addCheck(
+			new FormValidator(
+				$this,
+				'ldapLocalLoginOrder',
+				FORM_VALIDATOR_REQUIRED_VALUE,
+				'plugins.generic.ldap.manager.settings.ldapLocalLoginOrderRequired'
+			)
+		);
 		$this->addCheck(new FormValidatorPost($this));
 		$this->addCheck(new FormValidatorCSRF($this));
 	}
