@@ -11,12 +11,12 @@
  * @class LDAPHandler
  * @ingroup plugins_generic_ldap
  *
- * @brief Handle Shibboleth responses
+ * @brief Handle LDAP Authentication
  */
 
-import('classes.handler.Handler');
+import('lib.pkp.pages.login.LoginHandler');
 
-class LDAPHandler extends Handler {
+class LDAPHandler extends LoginHandler {
 	/** @var LDAPAuthPlugin */
 	var $_plugin;
 
@@ -24,7 +24,7 @@ class LDAPHandler extends Handler {
 	var $_contextId;
 
 	/**
-	 * Intercept normal login/registration requests; defer to Shibboleth.
+	 * Intercept normal login/registration requests; defer to LDAP.
 	 * 
 	 * @param $args array
 	 * @param $request Request
@@ -80,6 +80,13 @@ class LDAPHandler extends Handler {
 	 * @copydoc LDAPHandler::activateUser()
 	 */
 	function signIn($args, $request) {
+		// We need to duplicate this bit from LoginHandler::signIn()
+		if (Validation::isLoggedIn()) $this->sendHome($request);
+		if (Config::getVar('security', 'force_login_ssl') && $request->getProtocol() != 'https') {
+			// Force SSL connections for login
+			$request->redirectSSL();
+		}
+
 		$context = $this->getTargetContext($request);
 		$router = $request->getRouter();
 
@@ -134,18 +141,8 @@ class LDAPHandler extends Handler {
 			$ldapSearchResult = ldap_search($ldapConn, $ldapSuffix, $ldapFilter, ['dn', 'givenName', 'sn', 'mail', 'telephoneNumber']);
 			$data =	ldap_get_entries($ldapConn, $ldapSearchResult);
 
-			// not in ldap, so
-			if (isset($data['count']) && $data['count'] == 0)
-			{
-				// test if normal user login will work
-				$reason = null;
-				$result = Validation::login($username, $input['password'], $reason, $input['remember']);
-				
-				if ($result)
-					return $this->_redirectAfterLogin($request);
-			}
 			// found in ldap, so
-			else
+			if (isset($data['count']) && $data['count'] == 1)
 			{
 				$data = $data[0];
 				$givenName = $data['givenname'][0]??null;
@@ -177,29 +174,8 @@ class LDAPHandler extends Handler {
 				}
 			}
 		}
-
-		$contextPath = is_null($context) ? "" : $context->getPath();
-		$returnUrl = $router->url($request, $contextPath);
-		return $request->redirectUrl($returnUrl);
-	}
-
-	/**
-	 * Intercept normal logout; redirect to context home page instead
-	 * of login (which would send back to Shibboleth again).
-	 * 
-	 * @param $args array
-	 * @param $request Request
-	 * @return bool
-	 */
-	function signOut($args, $request) {
-		$context = $this->getTargetContext($request);
-		$router = $request->getRouter();
-
-		Validation::logout();
-
-		$contextPath = is_null($context) ? "" : $context->getPath();
-		$returnUrl = $router->url($request, $contextPath);
-		return $request->redirectUrl($returnUrl);
+		// test if normal user login will work
+		parent::signIn($args, $request);
 	}
 
 	/**
@@ -214,7 +190,7 @@ class LDAPHandler extends Handler {
 	// Private helper methods
 	//
 	/**
-	 * Get the Shibboleth plugin object
+	 * Get the LDAP plugin object
 	 * 
 	 * @return LDAPAuthPlugin
 	 */

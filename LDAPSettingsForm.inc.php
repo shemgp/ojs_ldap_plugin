@@ -11,7 +11,7 @@
  * @class LDAPSettingsForm
  * @ingroup plugins_generic_ldap
  *
- * @brief Form for managers to modify Shibboleth
+ * @brief Form for managers to modify LDAP
  * authentication plugin settings
  */
 

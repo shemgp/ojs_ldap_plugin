@@ -249,7 +249,6 @@ class LDAPAuthPlugin extends GenericPlugin {
 							'requestResetPassword',
 							'savePassword',
 							'signIn',
-							'signOut',
 						)
 					))
 				|| ($page == 'user'
