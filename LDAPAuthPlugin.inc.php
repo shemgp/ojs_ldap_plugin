@@ -39,12 +39,15 @@ class LDAPAuthPlugin extends GenericPlugin {
 	function __construct() {
 		parent::__construct();
 		$this->_contextId = $this->getCurrentContextId();
-		$this->_globallyEnabled = $this->getSetting(0, 'enabled');
+		$this->_globallyEnabled = $this->getSetting(CONTEXT_SITE, 'enabled');
 		$this->_singleContext = true;
 		$contextDao = Application::getContextDAO();
 		$workingContexts = $contextDao->getAvailable();
 		if ($workingContexts && $workingContexts->getCount() > 1) {
 			$this->_singleContext = false;
+		}
+		if ($this->_singleContext) {
+			$this->_contextId = CONTEXT_SITE;
 		}
 	}
 
@@ -52,9 +55,12 @@ class LDAPAuthPlugin extends GenericPlugin {
 	 * @copydoc Plugin::register()
 	 */
 	function register($category, $path, $mainContextId = null) {
+		if ($this->_singleContext) {
+			$mainContextId = CONTEXT_SITE;
+		}
 		$success = parent::register($category, $path, $mainContextId);
 		$this->addLocaleData();
-		if ($success && $this->getEnabled()) {
+		if ($success && $this->getEnabled($mainContextId)) {
 			// Register pages to handle login.
 			HookRegistry::register(
 				'LoadHandler',
@@ -132,7 +138,7 @@ class LDAPAuthPlugin extends GenericPlugin {
 	 * @copydoc Plugin::getSetting()
 	 */
 	function getSetting($contextId, $name) {
-		if ($this->_globallyEnabled) {
+		if ($this->_globallyEnabled || $this->_singleContext) {
 			return parent::getSetting(CONTEXT_SITE, $name);
 		} else {
 			return parent::getSetting($contextId, $name);
@@ -217,12 +223,12 @@ class LDAPAuthPlugin extends GenericPlugin {
 	 * @return boolean
 	 */
 	function getEnabled($contextId = null) {
-		if ($contextId == null) {
+		if ($contextId === null) {
 			$contextId = $this->getCurrentContextId();
-			// LazyLoadPlugin::getEnabled just asks here if this is a site plugin
-			if ($this->_globallyEnabled || $this->_singleContext) {
-				$contextId = CONTEXT_SITE;
-			}
+		}
+		// LazyLoadPlugin::getEnabled just asks if this is a site plugin above
+		if ($this->_globallyEnabled || $this->_singleContext) {
+			$contextId = CONTEXT_SITE;
 		}
 		return $this->getSetting($contextId, 'enabled');
 	}
