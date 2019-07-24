@@ -124,6 +124,9 @@ class LDAPHandler extends LoginHandler {
 			'ldapLocalLoginOrder'
 		);
 
+		// The $reason variable will be passed by reference to Validation::login() calls for error reporting
+		$reason = null;
+
 		// test if normal user login will work before testing LDAP
 		$username = $input['username'];
 		if ($ldapLocalLoginOrder == LDAPAUTH_LOCAL_BEFORE)
@@ -206,22 +209,20 @@ class LDAPHandler extends LoginHandler {
 			parent::signIn($args, $request);
 		}
 
-		// display error message if LDAP login had error
-		if ($ldapLocalLoginOrder == LDAPAUTH_LOCAL_NEVER)
-		{
-			$sessionManager = SessionManager::getManager();
-			$session = $sessionManager->getUserSession();
-			$templateMgr = TemplateManager::getManager($request);
-			$templateMgr->assign(array(
-				'username' => $request->getUserVar('username'),
-				'remember' => $request->getUserVar('remember'),
-				'source' => $request->getUserVar('source'),
-				'showRemember' => Config::getVar('general', 'session_lifetime') > 0,
-				'error' => $reason===null?'user.login.loginError':($reason===''?'user.login.accountDisabled':'user.login.accountDisabledWithReason'),
-				'reason' => $reason,
-			));
-			$templateMgr->display('frontend/pages/userLogin.tpl');
-		}
+		// No allowed authentication succeeded; redisplay the form
+		$this->setupTemplate($request);
+		$sessionManager = SessionManager::getManager();
+		$session = $sessionManager->getUserSession();
+		$templateMgr = TemplateManager::getManager($request);
+		$templateMgr->assign(array(
+			'username' => $request->getUserVar('username'),
+			'remember' => $request->getUserVar('remember'),
+			'source' => $request->getUserVar('source'),
+			'showRemember' => Config::getVar('general', 'session_lifetime') > 0,
+			'error' => $reason===null?'user.login.loginError':($reason===''?'user.login.accountDisabled':'user.login.accountDisabledWithReason'),
+			'reason' => $reason,
+		));
+		$templateMgr->display('frontend/pages/userLogin.tpl');
 	}
 
 	/**
